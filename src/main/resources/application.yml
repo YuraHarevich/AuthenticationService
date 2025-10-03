@@ -1,0 +1,23 @@
+server:
+  port: 8020
+spring:
+  application:
+    name: user-service
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_schema: user_schema
+  liquibase:
+    change-log: classpath:/db/changelog/app-changelog.xml
+  datasource:
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/users}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+
+auth:
+  refresh-token-expiration: 1800000
