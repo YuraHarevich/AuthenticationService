@@ -10,4 +10,8 @@ public final class AuthenticationServiceConstantResponseMessages {
 
     public static final String USER_ALREADY_EXISTS_MESSAGE = "User with username %s already exists";
 
+    public static final String INVALID_CREDENTIALS_MESSAGE = "Invalid email or password";
+
+    public static final String REFRESH_TOKEN_INVALID_MESSAGE =  "Refresh token is not in database or expired";
+
 }

@@ -10,4 +10,6 @@ public final class AuthenticationServiceConstantValues {
 
     public static final List<String> DEFAULT_USER_ROLE = List.of("ROLE_USER");
 
+    public static final String DEFAULT_TOKEN_TYPE = "Bearer";
+
 }

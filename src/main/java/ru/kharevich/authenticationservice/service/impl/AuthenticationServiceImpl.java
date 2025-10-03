@@ -28,7 +28,11 @@ import ru.kharevich.authenticationservice.util.properties.AuthServiceProperties;
 import java.time.Instant;
 import java.util.Optional;
 
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.INVALID_CREDENTIALS_MESSAGE;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.REFRESH_TOKEN_INVALID_MESSAGE;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_ALREADY_EXISTS_MESSAGE;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_NOT_FOUND_BY_USERNAME;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantValues.DEFAULT_TOKEN_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public SignUpResponse signUp(SignUpRequest request) {
 
         if (userRepository.findByUsername(request.username()).isPresent()) {
-            throw new IllegalStateException("Login is already taken");
+            throw new IllegalStateException(USER_ALREADY_EXISTS_MESSAGE);
         }
         User user = userMapper.toUser(request, encoder.encode(request.password()));
         User savedUser = userRepository.save(user);
@@ -58,7 +62,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Invalid email or password");
+            throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
         }
 
         User user = userRepository.findByUsername(request.username())
@@ -70,7 +74,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
         RefreshToken refreshToken = createRefreshToken(request.username());
 
-        return new AuthResponse(accessToken, refreshToken.getToken(), "Bearer", userDetails.getId(), userDetails.getUsername());
+        return new AuthResponse(accessToken, refreshToken.getToken(), DEFAULT_TOKEN_TYPE, userDetails.getId(), userDetails.getUsername());
     }
 
 
@@ -92,10 +96,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     UserDetails appUserDetails = new UserDetails(user);
                     String newAccessToken = jwtTokenProvider.generateAccessToken(appUserDetails);
 
-                    return new AuthResponse(newAccessToken, request.refreshToken(), "Bearer", user.getId(), user.getUsername());
+                    return new AuthResponse(newAccessToken, request.refreshToken(), DEFAULT_TOKEN_TYPE, user.getId(), user.getUsername());
                 })
                 .orElseThrow(
-                        () -> new RefreshTokenException("Refresh token is not in database or expired")
+                        () -> new RefreshTokenException(REFRESH_TOKEN_INVALID_MESSAGE)
                 );
     }
 
@@ -124,7 +128,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(token);
-            throw new RefreshTokenException("Refresh token expired " + token.getToken());
+            throw new RefreshTokenException(REFRESH_TOKEN_INVALID_MESSAGE);
         }
         return token;
     }
