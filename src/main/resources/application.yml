@@ -20,4 +20,7 @@ spring:
     password: ${DB_PASSWORD:password}
 
 auth:
-  refresh-token-expiration: 1800000
+  jwt:
+    secret: ${JWT_SECRET:VGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBKV1QgdG9rZW5zISEh}
+    token-expiration: 300000
+    refresh-token-expiration: 1800000

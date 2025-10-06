@@ -1,8 +1,8 @@
 package ru.kharevich.authenticationservice.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+
+import java.time.LocalDateTime;
 
 public record SignUpRequest (
 
@@ -19,10 +19,14 @@ public record SignUpRequest (
     String password,
 
     @NotBlank(message = "First name is required")
-    String firstName,
+    String firstname,
 
     @NotBlank(message = "Last name is required")
-    String lastName
+    String lastname,
+
+    @NotNull(message = "Birth date is required")
+    @Past(message = "Birth date must be in the past")
+    LocalDateTime birthDate
 
 ) {
 }

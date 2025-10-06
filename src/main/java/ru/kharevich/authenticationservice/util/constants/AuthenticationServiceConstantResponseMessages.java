@@ -14,4 +14,7 @@ public final class AuthenticationServiceConstantResponseMessages {
 
     public static final String REFRESH_TOKEN_INVALID_MESSAGE =  "Refresh token is not in database or expired";
 
+    public static final String SIGN_IN_PROCESS_FAILED =  "Unable to create new user with username %s";
+
+
 }

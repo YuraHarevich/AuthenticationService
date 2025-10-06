@@ -2,6 +2,7 @@ package ru.kharevich.authenticationservice.util.mapper;
 
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;
 import ru.kharevich.authenticationservice.dto.response.AuthResponse;
@@ -14,6 +15,7 @@ import ru.kharevich.authenticationservice.model.User;
 )
 public interface UserMapper {
 
+    @Mapping(target = "password", source = "password")
     User toUser(SignUpRequest userRequest, String password);
 
     SignUpResponse toResponse(User user);

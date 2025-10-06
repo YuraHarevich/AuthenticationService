@@ -26,13 +26,13 @@ public class AuthController implements AuthApi {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register")
+    @PostMapping("/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
     public SignUpResponse signUp(@Valid @RequestBody SignUpRequest request){
         return authenticationService.signUp(request);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/sign-in")
     @ResponseStatus(HttpStatus.OK)
     public AuthResponse signIn(@Valid @RequestBody SignInRequest request){
         return authenticationService.signIn(request);

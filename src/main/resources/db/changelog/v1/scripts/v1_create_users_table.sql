@@ -9,7 +9,7 @@ CREATE TABLE user_schema.users
     lastname VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     username VARCHAR(255) NOT NULL,
-    salt VARCHAR(255) NOT NULL
+    salt VARCHAR(255)
 );
 
 ALTER TABLE user_schema.users

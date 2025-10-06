@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.kharevich.authenticationservice.model.User;
 import ru.kharevich.authenticationservice.repository.UserRepository;
+import ru.kharevich.authenticationservice.util.validation.AuthenticationValidationService;
 
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_NOT_FOUND_BY_USERNAME;
 
@@ -16,10 +17,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    private final AuthenticationValidationService authenticationValidationService;
+
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_BY_USERNAME.formatted(username)));
+        User user = authenticationValidationService.findByUsernameThrowsExceptionIfDoesntExist(
+                username,
+                new UsernameNotFoundException(USER_NOT_FOUND_BY_USERNAME.formatted(username)));
         return new ru.kharevich.authenticationservice.security.UserDetails(user);
     }
 

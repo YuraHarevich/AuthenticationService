@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import ru.kharevich.authenticationservice.util.properties.AuthServiceProperties;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -30,12 +31,11 @@ public class JwtTokenProvider {
     private final long refreshTokenExpiration;
 
 
-    public JwtTokenProvider(@Value("${app.jwt.secret}") String jwtSecret,
-                            @Value("${app.jwt.tokenExpiration}") long accessTokenExpiration,
-                            @Value("${app.jwt.refreshTokenExpiration}") long refreshTokenExpiration) {
-        this.secretKey = getSigningKey(jwtSecret);
-        this.accessTokenExpiration = accessTokenExpiration;
-        this.refreshTokenExpiration = refreshTokenExpiration;
+    public JwtTokenProvider(AuthServiceProperties authServiceProperties) {
+        String jwtSecret = (authServiceProperties.getSecret());
+        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        this.accessTokenExpiration = authServiceProperties.getTokenExpiration();
+        this.refreshTokenExpiration = authServiceProperties.getRefreshTokenExpiration();
     }
 
     public String generateAccessToken(UserDetails userDetails) {
@@ -62,11 +62,6 @@ public class JwtTokenProvider {
                 .expiration(new Date(System.currentTimeMillis() + tokenExpiration))
                 .signWith(secretKey)
                 .compact();
-    }
-
-    private SecretKey getSigningKey(String jwtSecret) {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public boolean validateToken(String token) {

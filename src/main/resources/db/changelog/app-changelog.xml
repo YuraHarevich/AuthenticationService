@@ -13,6 +13,8 @@
 
     <include file="v1/changesets/01-changeset-create-users.xml" relativeToChangelogFile="true"/>
 
+    <include file="v1/changesets/02-changeset-create-refresh_token.xml" relativeToChangelogFile="true"/>
+
     <changeSet id="100" author="Yura">
         <tagDatabase tag="setup is done"/>
     </changeSet>

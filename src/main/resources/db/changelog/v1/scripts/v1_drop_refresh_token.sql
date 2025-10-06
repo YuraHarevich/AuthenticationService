@@ -1,0 +1,1 @@
+DROP TABLE user_schema.refresh_token

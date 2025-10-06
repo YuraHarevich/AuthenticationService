@@ -1,6 +1,5 @@
 package ru.kharevich.authenticationservice.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -8,6 +7,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;
@@ -24,14 +25,12 @@ import ru.kharevich.authenticationservice.security.UserDetails;
 import ru.kharevich.authenticationservice.service.AuthenticationService;
 import ru.kharevich.authenticationservice.util.mapper.UserMapper;
 import ru.kharevich.authenticationservice.util.properties.AuthServiceProperties;
+import ru.kharevich.authenticationservice.util.validation.AuthenticationValidationService;
 
 import java.time.Instant;
 import java.util.Optional;
 
-import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.INVALID_CREDENTIALS_MESSAGE;
-import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.REFRESH_TOKEN_INVALID_MESSAGE;
-import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_ALREADY_EXISTS_MESSAGE;
-import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_NOT_FOUND_BY_USERNAME;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.*;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantValues.DEFAULT_TOKEN_TYPE;
 
 @Service
@@ -45,17 +44,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserMapper userMapper;
+    private final AuthenticationValidationService authenticationValidationService;
 
     public SignUpResponse signUp(SignUpRequest request) {
-
-        if (userRepository.findByUsername(request.username()).isPresent()) {
-            throw new IllegalStateException(USER_ALREADY_EXISTS_MESSAGE);
-        }
+        authenticationValidationService.findByUsernameThrowsExceptionIfExists(
+                request.username(),
+                new IllegalStateException(USER_ALREADY_EXISTS_MESSAGE));
         User user = userMapper.toUser(request, encoder.encode(request.password()));
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AuthResponse signIn(SignInRequest request) {
         try {
             authenticationManager.authenticate(
@@ -64,12 +64,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
         }
-
-        User user = userRepository.findByUsername(request.username())
-                .orElseThrow(
-                        () -> new UsernameNotFoundException(USER_NOT_FOUND_BY_USERNAME.formatted(request.username()))
-                );
-
+        User user = authenticationValidationService.findByUsernameThrowsExceptionIfDoesntExist(
+                request.username(),
+                new IllegalStateException(SIGN_IN_PROCESS_FAILED.formatted(request.username())
+        ));
         UserDetails userDetails = new UserDetails(user);
         String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
         RefreshToken refreshToken = createRefreshToken(request.username());

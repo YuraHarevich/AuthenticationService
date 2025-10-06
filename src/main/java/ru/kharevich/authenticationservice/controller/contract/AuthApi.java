@@ -16,7 +16,7 @@ public interface AuthApi {
 
     AuthResponse signIn(@Valid @RequestBody SignInRequest request);
 
-    TokenValidationResponse validateToken(@RequestHeader("Authorization") String authHeader);
+    TokenValidationResponse validateToken(@RequestParam("token") String authHeader);
 
     AuthResponse refreshToken(@Valid @RequestBody RefreshTokenRequest request);
 

@@ -49,7 +49,7 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "salt", nullable = false)
+    @Column(name = "salt")
     private String salt;
 
 }
