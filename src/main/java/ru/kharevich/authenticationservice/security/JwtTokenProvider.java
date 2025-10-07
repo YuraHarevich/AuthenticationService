@@ -51,13 +51,13 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        Claims claims = Jwts.claims()
-                .subject(userDetails.getUsername())
-                .add("roles", roles)
-                .build();
-
         return Jwts.builder()
-                .claims(claims)
+                .subject(userDetails.getUsername())
+                .claim("userId", userDetails.getId())
+                .claim("email", userDetails.getLastname())
+                .claim("firstName", userDetails.getFirstname())
+                .claim("lastName", userDetails.getLastname())
+                .claim("roles", roles)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + tokenExpiration))
                 .signWith(secretKey)

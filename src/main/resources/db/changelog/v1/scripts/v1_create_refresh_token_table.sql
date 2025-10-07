@@ -1,6 +1,6 @@
 CREATE TABLE user_schema.refresh_token (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    token VARCHAR(255) NOT NULL UNIQUE,
+    token VARCHAR(500) NOT NULL UNIQUE,
     expiry_date TIMESTAMP NOT NULL,
     user_id UUID NOT NULL,
 

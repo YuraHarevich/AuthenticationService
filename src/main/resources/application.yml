@@ -21,6 +21,6 @@ spring:
 
 auth:
   jwt:
-    secret: ${JWT_SECRET:VGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBKV1QgdG9rZW5zISEh}
+    secret: ${JWT_SECRET:VGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIEpXVCB0b2tlbnMhISEhISEhISE=}
     token-expiration: 300000
     refresh-token-expiration: 1800000

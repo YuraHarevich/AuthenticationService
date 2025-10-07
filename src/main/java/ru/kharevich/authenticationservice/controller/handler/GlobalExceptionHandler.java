@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.kharevich.authenticationservice.dto.ErrorMessage;
+import ru.kharevich.authenticationservice.exceptions.RefreshTokenException;
 import ru.kharevich.authenticationservice.exceptions.UserNotFoundException;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
         UserNotFoundException.class
     })
-    public ResponseEntity<ErrorMessage> handle(Exception exception) {
+    public ResponseEntity<ErrorMessage> handleConflict(Exception exception) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(ErrorMessage.builder()
@@ -35,6 +36,18 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorMessage.builder()
                         .message(error.getDefaultMessage())
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler({
+            RefreshTokenException.class
+    })
+    public ResponseEntity<ErrorMessage> handleAuthorizationException(Exception ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorMessage.builder()
+                        .message(ex.getMessage())
                         .timestamp(LocalDateTime.now())
                         .build());
     }
