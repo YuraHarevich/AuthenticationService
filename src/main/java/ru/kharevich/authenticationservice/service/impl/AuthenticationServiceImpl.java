@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kharevich.authenticationservice.config.CustomSaltPasswordEncoder;
 import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;
@@ -23,6 +24,7 @@ import ru.kharevich.authenticationservice.repository.UserRepository;
 import ru.kharevich.authenticationservice.security.JwtTokenProvider;
 import ru.kharevich.authenticationservice.security.UserDetails;
 import ru.kharevich.authenticationservice.service.AuthenticationService;
+import ru.kharevich.authenticationservice.util.generator.SaltGenerator;
 import ru.kharevich.authenticationservice.util.mapper.UserMapper;
 import ru.kharevich.authenticationservice.util.properties.AuthServiceProperties;
 import ru.kharevich.authenticationservice.util.validation.AuthenticationValidationService;
@@ -40,17 +42,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthServiceProperties authServiceProperties;
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final PasswordEncoder encoder;
+    private final CustomSaltPasswordEncoder encoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserMapper userMapper;
     private final AuthenticationValidationService authenticationValidationService;
+    private final SaltGenerator saltGenerator;
 
     public SignUpResponse signUp(SignUpRequest request) {
         authenticationValidationService.findByUsernameThrowsExceptionIfExists(
                 request.username(),
                 new IllegalStateException(USER_ALREADY_EXISTS_MESSAGE));
-        User user = userMapper.toUser(request, encoder.encode(request.password()));
+        String salt = saltGenerator.generateSalt();
+        User user = userMapper.toUser(request, encoder.encodeWithSalt(request.password(),salt),salt);
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);
     }

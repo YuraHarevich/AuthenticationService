@@ -10,12 +10,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import ru.kharevich.authenticationservice.security.CustomSaltAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig  {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    private final CustomSaltAuthenticationProvider customSaltAuthenticationProvider;
 
     @Bean
     @Profile("!test")
@@ -38,6 +39,8 @@ public class WebSecurityConfig  {
                         .anyRequest().hasRole("USER"))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                //.authenticationManager(customAuthenticationManager)
+                .authenticationProvider(customSaltAuthenticationProvider)
                 .csrf(CsrfConfigurer::disable)
                 .build();
     }
@@ -50,5 +53,4 @@ public class WebSecurityConfig  {
             throw new RuntimeException(e);
         }
     }
-
 }

@@ -66,4 +66,8 @@ public class UserDetails implements org.springframework.security.core.userdetail
         return user.getLastname();
     }
 
+    public String getSalt() {
+        return user.getSalt();
+    }
+
 }

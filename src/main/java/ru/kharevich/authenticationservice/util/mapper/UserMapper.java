@@ -16,7 +16,7 @@ import ru.kharevich.authenticationservice.model.User;
 public interface UserMapper {
 
     @Mapping(target = "password", source = "password")
-    User toUser(SignUpRequest userRequest, String password);
+    User toUser(SignUpRequest userRequest, String password, String salt);
 
     SignUpResponse toResponse(User user);
 
