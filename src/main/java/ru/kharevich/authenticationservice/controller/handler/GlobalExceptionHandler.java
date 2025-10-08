@@ -1,7 +1,9 @@
 package ru.kharevich.authenticationservice.controller.handler;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,7 +18,7 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({
-        UserNotFoundException.class
+            UserNotFoundException.class
     })
     public ResponseEntity<ErrorMessage> handleConflict(Exception exception) {
         return ResponseEntity
@@ -38,6 +40,26 @@ public class GlobalExceptionHandler {
                         .message(error.getDefaultMessage())
                         .timestamp(LocalDateTime.now())
                         .build());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorMessage> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+
+        log.warn("JSON parse error: {}", ex.getMessage());
+
+        String message = "Invalid JSON format";
+
+        if (ex.getMessage() != null && ex.getMessage().contains("java.time.LocalDateTime")) {
+            message = "Invalid date format. Expected: yyyy-MM-dd'T'HH:mm:ss (e.g., 1990-05-15T14:30:00)";
+        }
+
+        ErrorMessage errorResponse = ErrorMessage.builder()
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
     @ExceptionHandler({

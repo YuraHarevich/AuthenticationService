@@ -2,10 +2,8 @@ package ru.kharevich.authenticationservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +30,10 @@ import ru.kharevich.authenticationservice.util.validation.AuthenticationValidati
 import java.time.Instant;
 import java.util.Optional;
 
-import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.*;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.REFRESH_TOKEN_INVALID_MESSAGE;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.SIGN_IN_PROCESS_FAILED;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_ALREADY_EXISTS_MESSAGE;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_NOT_FOUND_BY_USERNAME;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantValues.DEFAULT_TOKEN_TYPE;
 
 @Service
@@ -54,24 +55,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 request.username(),
                 new IllegalStateException(USER_ALREADY_EXISTS_MESSAGE));
         String salt = saltGenerator.generateSalt();
-        User user = userMapper.toUser(request, encoder.encodeWithSalt(request.password(),salt),salt);
+        User user = userMapper.toUser(request, encoder.encodeWithSalt(request.password(), salt), salt);
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public AuthResponse signIn(SignInRequest request) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.username(), request.password())
-            );
-        } catch (BadCredentialsException e) {
-            throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
-        }
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
+        );
         User user = authenticationValidationService.findByUsernameThrowsExceptionIfDoesntExist(
                 request.username(),
                 new IllegalStateException(SIGN_IN_PROCESS_FAILED.formatted(request.username())
-        ));
+                ));
         UserDetails userDetails = new UserDetails(user);
         String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
         RefreshToken refreshToken = createRefreshToken(request.username());
@@ -81,7 +78,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     public TokenValidationResponse validateToken(String token) {
-        if (!jwtTokenProvider.validateToken(token)){
+        if (!jwtTokenProvider.validateToken(token)) {
             return new TokenValidationResponse(false, null);
         }
 
@@ -105,7 +102,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 );
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RefreshToken createRefreshToken(String username) {
 
         User user = userRepository.findByUsername(username).orElseThrow(

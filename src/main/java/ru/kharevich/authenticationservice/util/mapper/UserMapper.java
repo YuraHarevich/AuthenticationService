@@ -5,7 +5,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;
-import ru.kharevich.authenticationservice.dto.response.AuthResponse;
 import ru.kharevich.authenticationservice.dto.response.SignUpResponse;
 import ru.kharevich.authenticationservice.model.User;
 

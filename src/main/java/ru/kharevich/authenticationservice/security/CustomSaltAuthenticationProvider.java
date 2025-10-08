@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import ru.kharevich.authenticationservice.config.CustomSaltPasswordEncoder;
 import ru.kharevich.authenticationservice.service.impl.UserDetailsServiceImpl;
 
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.INVALID_CREDENTIALS_MESSAGE;
+
 @Component
 public class CustomSaltAuthenticationProvider implements AuthenticationProvider {
 
@@ -34,7 +36,7 @@ public class CustomSaltAuthenticationProvider implements AuthenticationProvider 
                     user, rawPassword, user.getAuthorities());
         }
 
-        throw new BadCredentialsException("Invalid credentials");
+        throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
     }
 
     @Override

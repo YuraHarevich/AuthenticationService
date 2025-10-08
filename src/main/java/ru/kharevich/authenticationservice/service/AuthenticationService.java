@@ -1,7 +1,5 @@
 package ru.kharevich.authenticationservice.service;
 
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;

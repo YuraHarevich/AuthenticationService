@@ -1,7 +1,6 @@
 package ru.kharevich.authenticationservice.util.validation;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.kharevich.authenticationservice.model.User;
 import ru.kharevich.authenticationservice.repository.UserRepository;
@@ -9,7 +8,6 @@ import ru.kharevich.authenticationservice.repository.UserRepository;
 import java.util.Optional;
 
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_ALREADY_EXISTS_MESSAGE;
-import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_NOT_FOUND_BY_USERNAME;
 
 @Service
 @RequiredArgsConstructor

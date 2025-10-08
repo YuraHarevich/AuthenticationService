@@ -3,7 +3,14 @@ package ru.kharevich.authenticationservice.controller.impl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.kharevich.authenticationservice.controller.contract.AuthApi;
 import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
@@ -16,31 +23,38 @@ import ru.kharevich.authenticationservice.service.AuthenticationService;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Validated
 public class AuthController implements AuthApi {
 
     private final AuthenticationService authenticationService;
 
+    @GetMapping("/admin")
+    @ResponseStatus(HttpStatus.OK)
+    public String admin() {
+        return "admin";
+    }
+
     @PostMapping("/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
-    public SignUpResponse signUp(@Valid @RequestBody SignUpRequest request){
+    public SignUpResponse signUp(@Valid @RequestBody SignUpRequest request) {
         return authenticationService.signUp(request);
     }
 
     @PostMapping("/sign-in")
     @ResponseStatus(HttpStatus.OK)
-    public AuthResponse signIn(@Valid @RequestBody SignInRequest request){
+    public AuthResponse signIn(@Valid @RequestBody SignInRequest request) {
         return authenticationService.signIn(request);
     }
 
     @PostMapping("/validate")
     @ResponseStatus(HttpStatus.OK)
-    public TokenValidationResponse validateToken(@RequestParam("token") String token){
+    public TokenValidationResponse validateToken(@RequestParam("token") String token) {
         return authenticationService.validateToken(token);
     }
 
     @PostMapping("/refresh")
     @ResponseStatus(HttpStatus.OK)
-    public AuthResponse refreshToken(@Valid @RequestBody RefreshTokenRequest request){
+    public AuthResponse refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         return authenticationService.getRefreshToken(request);
     }
 

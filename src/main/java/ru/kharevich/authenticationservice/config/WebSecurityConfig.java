@@ -15,15 +15,21 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.kharevich.authenticationservice.security.CustomSaltAuthenticationProvider;
+import ru.kharevich.authenticationservice.security.JwtAccessDeniedHandler;
+import ru.kharevich.authenticationservice.security.JwtAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig  {
+public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final CustomSaltAuthenticationProvider customSaltAuthenticationProvider;
+
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     @Profile("!test")
@@ -35,13 +41,17 @@ public class WebSecurityConfig  {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-up").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/validate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.OPTIONS, "/api/v1/**").permitAll()
                         .anyRequest().hasRole("USER"))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                //.authenticationManager(customAuthenticationManager)
                 .authenticationProvider(customSaltAuthenticationProvider)
                 .csrf(CsrfConfigurer::disable)
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                )
                 .build();
     }
 

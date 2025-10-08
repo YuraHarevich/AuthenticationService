@@ -1,8 +1,8 @@
 package ru.kharevich.authenticationservice.controller.contract;
 
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;

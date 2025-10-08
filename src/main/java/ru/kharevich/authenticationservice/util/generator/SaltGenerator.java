@@ -12,6 +12,7 @@ public class SaltGenerator {
 
     /**
      * Генерация случайной соли заданной длины
+     *
      * @param lengthInBytes длина соли в байтах (рекомендуется 16-32 байта)
      * @return соль в Base64 кодировке
      */
