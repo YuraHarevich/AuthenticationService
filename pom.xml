@@ -14,7 +14,7 @@
     <description>authentication-service</description>
 
     <properties>
-        <java.version>23</java.version>
+        <java.version>21</java.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <mapstruct.binding.version>0.2.0</mapstruct.binding.version>
     </properties>
