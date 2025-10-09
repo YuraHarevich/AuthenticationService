@@ -24,7 +24,6 @@ public class UserDetails implements org.springframework.security.core.userdetail
         return DEFAULT_USER_ROLE.stream().map(SimpleGrantedAuthority::new).toList();
     }
 
-
     @Override
     public String getPassword() {
         return user.getPassword();
