@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ActiveProfiles;
 import ru.kharevich.authenticationservice.config.CustomSaltPasswordEncoder;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.*;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.REFRESH_TOKEN_INVALID_MESSAGE;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class AuthenticationServiceImplTest {
 
     @Mock
@@ -344,7 +346,7 @@ class AuthenticationServiceImplTest {
 
         assertEquals(REFRESH_TOKEN_INVALID_MESSAGE, exception.getMessage());
         verify(refreshTokenRepository).findByToken(eq(TEST_REFRESH_TOKEN));
-        // Не проверяем verifyExpiration, так как он не вызывается при отсутствии токена
+
         verifyNoInteractions(jwtTokenProvider);
     }
 

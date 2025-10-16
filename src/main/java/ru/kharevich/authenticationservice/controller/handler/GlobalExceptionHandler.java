@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.kharevich.authenticationservice.dto.ErrorMessage;
 import ru.kharevich.authenticationservice.exceptions.RefreshTokenException;
+import ru.kharevich.authenticationservice.exceptions.TokenValidationException;
 import ru.kharevich.authenticationservice.exceptions.UserNotFoundException;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleConflict(Exception exception) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(ErrorMessage.builder()
+                        .message(exception.getMessage())
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler({
+            TokenValidationException.class
+    })
+    public ResponseEntity<ErrorMessage> handleUnauthorized(Exception exception) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorMessage.builder()
                         .message(exception.getMessage())
                         .timestamp(LocalDateTime.now())

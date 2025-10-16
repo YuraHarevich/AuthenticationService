@@ -15,6 +15,7 @@ import ru.kharevich.authenticationservice.dto.response.AuthResponse;
 import ru.kharevich.authenticationservice.dto.response.SignUpResponse;
 import ru.kharevich.authenticationservice.dto.response.TokenValidationResponse;
 import ru.kharevich.authenticationservice.exceptions.RefreshTokenException;
+import ru.kharevich.authenticationservice.exceptions.TokenValidationException;
 import ru.kharevich.authenticationservice.model.RefreshToken;
 import ru.kharevich.authenticationservice.model.User;
 import ru.kharevich.authenticationservice.repository.RefreshTokenRepository;
@@ -79,7 +80,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public TokenValidationResponse validateToken(String token) {
         if (!jwtTokenProvider.validateToken(token)) {
-            return new TokenValidationResponse(false, null);
+            throw new TokenValidationException("token is not valid");
         }
 
         String email = jwtTokenProvider.getUsernameFromToken(token);
