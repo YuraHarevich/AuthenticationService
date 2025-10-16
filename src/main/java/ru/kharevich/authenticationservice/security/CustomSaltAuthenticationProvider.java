@@ -1,5 +1,6 @@
 package ru.kharevich.authenticationservice.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,13 +14,12 @@ import ru.kharevich.authenticationservice.service.impl.UserDetailsServiceImpl;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.INVALID_CREDENTIALS_MESSAGE;
 
 @Component
+@RequiredArgsConstructor
 public class CustomSaltAuthenticationProvider implements AuthenticationProvider {
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private CustomSaltPasswordEncoder customSaltPasswordEncoder;
+    private final CustomSaltPasswordEncoder customSaltPasswordEncoder;
 
     @Override
     public Authentication authenticate(Authentication authentication)
@@ -43,4 +43,5 @@ public class CustomSaltAuthenticationProvider implements AuthenticationProvider 
     public boolean supports(Class<?> authentication) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
+
 }

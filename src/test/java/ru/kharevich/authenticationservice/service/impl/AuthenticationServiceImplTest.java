@@ -11,9 +11,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import ru.kharevich.authenticationservice.config.CustomSaltPasswordEncoder;
+import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
 import ru.kharevich.authenticationservice.dto.request.SignUpRequest;
-import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.response.AuthResponse;
 import ru.kharevich.authenticationservice.dto.response.SignUpResponse;
 import ru.kharevich.authenticationservice.dto.response.TokenValidationResponse;
@@ -29,15 +29,29 @@ import ru.kharevich.authenticationservice.util.mapper.UserMapper;
 import ru.kharevich.authenticationservice.util.properties.AuthServiceProperties;
 import ru.kharevich.authenticationservice.util.validation.AuthenticationValidationService;
 
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.REFRESH_TOKEN_INVALID_MESSAGE;
 
 @ExtendWith(MockitoExtension.class)

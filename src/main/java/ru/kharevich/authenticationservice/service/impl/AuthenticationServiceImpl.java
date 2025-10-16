@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.REFRESH_TOKEN_INVALID_MESSAGE;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.SIGN_IN_PROCESS_FAILED;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.TOKEN_IS_NOT_VALID_EXCEPTION;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_ALREADY_EXISTS_MESSAGE;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantResponseMessages.USER_NOT_FOUND_BY_USERNAME;
 import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantValues.DEFAULT_TOKEN_TYPE;
@@ -80,9 +81,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public TokenValidationResponse validateToken(String token) {
         if (!jwtTokenProvider.validateToken(token)) {
-            throw new TokenValidationException("token is not valid");
+            throw new TokenValidationException(TOKEN_IS_NOT_VALID_EXCEPTION);
         }
-
         String email = jwtTokenProvider.getUsernameFromToken(token);
 
         return new TokenValidationResponse(true, email);

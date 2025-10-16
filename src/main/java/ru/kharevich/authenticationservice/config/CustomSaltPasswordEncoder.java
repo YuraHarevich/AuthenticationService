@@ -13,6 +13,7 @@ import java.util.Base64;
 public class CustomSaltPasswordEncoder implements PasswordEncoder {
 
     private final BCryptPasswordEncoder defaultEncoder = new BCryptPasswordEncoder();
+
     private static final String SALT_SEPARATOR = "::";
 
     /**
@@ -32,7 +33,6 @@ public class CustomSaltPasswordEncoder implements PasswordEncoder {
      */
     @Override
     public boolean matches(CharSequence rawPassword, String encodedPassword) {
-        // Если пароль закодирован в нашем формате (с разделителем ::)
         if (isEncodedByThisEncoder(encodedPassword)) {
             String salt = extractSalt(encodedPassword);
             String bcryptHash = extractBcryptHash(encodedPassword);
@@ -40,7 +40,6 @@ public class CustomSaltPasswordEncoder implements PasswordEncoder {
             return defaultEncoder.matches(saltedPassword, bcryptHash);
         }
 
-        // Fallback: стандартная проверка BCrypt (для обратной совместимости)
         return defaultEncoder.matches(rawPassword, encodedPassword);
     }
 
@@ -51,7 +50,6 @@ public class CustomSaltPasswordEncoder implements PasswordEncoder {
         String saltedPassword = createSaltedPassword(rawPassword, salt);
         String bcryptHash = defaultEncoder.encode(saltedPassword);
 
-        // Сохраняем в формате: "bcryptHash::salt"
         return bcryptHash + SALT_SEPARATOR + salt;
     }
 
@@ -60,7 +58,6 @@ public class CustomSaltPasswordEncoder implements PasswordEncoder {
      * Используется в кастомном AuthenticationManager
      */
     public boolean matchesWithCustomSalt(CharSequence rawPassword, String encodedPassword, String salt) {
-        // Создаем salted пароль и проверяем через BCrypt
         String saltedPassword = createSaltedPassword(rawPassword, salt);
         return defaultEncoder.matches(saltedPassword, encodedPassword);
     }
@@ -130,7 +127,7 @@ public class CustomSaltPasswordEncoder implements PasswordEncoder {
      */
     public String extractBcryptHash(String encodedPassword) {
         if (!isEncodedByThisEncoder(encodedPassword)) {
-            return encodedPassword; // Возвращаем как есть, если это чистый BCrypt
+            return encodedPassword;
         }
         String[] parts = encodedPassword.split(SALT_SEPARATOR);
         return parts.length >= 1 ? parts[0] : encodedPassword;

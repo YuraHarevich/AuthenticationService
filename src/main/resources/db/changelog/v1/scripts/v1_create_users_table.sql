@@ -1,15 +1,15 @@
 CREATE TABLE user_schema.users
 (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     birth_date TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    firstname VARCHAR(255) NOT NULL,
-    lastname VARCHAR(255) NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    username VARCHAR(255) NOT NULL,
-    salt VARCHAR(255)
+    created_at TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    password   VARCHAR(255) NOT NULL,
+    email      VARCHAR(255) NOT NULL,
+    firstname  VARCHAR(255) NOT NULL,
+    lastname   VARCHAR(255) NOT NULL,
+    updated_at TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    username   VARCHAR(255) NOT NULL,
+    salt       VARCHAR(255)
 );
 
 ALTER TABLE user_schema.users

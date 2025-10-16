@@ -20,5 +20,6 @@ public final class AuthenticationServiceConstantResponseMessages {
 
     public static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
 
+    public static final String TOKEN_IS_NOT_VALID_EXCEPTION = "token is not valid";
 
 }

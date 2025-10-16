@@ -17,6 +17,9 @@ import ru.kharevich.authenticationservice.security.JwtTokenProvider;
 
 import java.io.IOException;
 
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantValues.AUTH_HEADER;
+import static ru.kharevich.authenticationservice.util.constants.AuthenticationServiceConstantValues.TOKEN_BEGINS_WITH;
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -50,8 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+        String bearerToken = request.getHeader(AUTH_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_BEGINS_WITH)) {
             return bearerToken.substring(7);
         }
         return null;

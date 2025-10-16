@@ -12,4 +12,8 @@ public final class AuthenticationServiceConstantValues {
 
     public static final String DEFAULT_TOKEN_TYPE = "Bearer";
 
+    public static final String AUTH_HEADER = "Authorization";
+
+    public static final String TOKEN_BEGINS_WITH = "Bearer ";
+
 }
