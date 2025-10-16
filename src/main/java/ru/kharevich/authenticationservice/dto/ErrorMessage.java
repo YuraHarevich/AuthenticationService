@@ -1,7 +1,6 @@
 package ru.kharevich.authenticationservice.dto;
 
 import lombok.Builder;
-import lombok.Data;
 
 import java.time.LocalDateTime;
 

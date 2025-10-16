@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: user-service-test
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_schema: user_schema
+  liquibase:
+    enabled: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5434/testdb
+    username: testuser
+    password: testpass
+  sql:
+    init:
+      mode: always
+
+auth:
+  jwt:
+    secret: VGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIEpXVCB0b2tlbnMhISEhISEhISE=
+    token-expiration: 300000
+    refresh-token-expiration: 1800000
+
+logging:
+  level:
+    org.springframework.test.context: DEBUG
+    org.testcontainers: INFO
+    com.zaxxer.hikari: INFO

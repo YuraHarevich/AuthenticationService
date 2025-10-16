@@ -10,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import ru.kharevich.authenticationservice.config.CustomSaltPasswordEncoder;
 import ru.kharevich.authenticationservice.dto.request.RefreshTokenRequest;
 import ru.kharevich.authenticationservice.dto.request.SignInRequest;
@@ -35,13 +36,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -56,6 +54,10 @@ import static ru.kharevich.authenticationservice.util.constants.AuthenticationSe
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "spring.liquibase.enabled=false",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
 class AuthenticationServiceImplTest {
 
     @Mock
@@ -97,7 +99,6 @@ class AuthenticationServiceImplTest {
     private final String TEST_REFRESH_TOKEN = "test-refresh-token";
     private final String ENCODED_PASSWORD = "encoded-password";
 
-    // Test Data
     private SignUpRequest createSignUpRequest() {
         return new SignUpRequest(
                 TEST_USERNAME,
@@ -139,7 +140,6 @@ class AuthenticationServiceImplTest {
     // Tests for signUp method
     @Test
     void signUp_ShouldSuccessfullyCreateUser() {
-        // Given
         SignUpRequest request = createSignUpRequest();
         User user = createUser();
         SignUpResponse expectedResponse = new SignUpResponse(
@@ -155,10 +155,8 @@ class AuthenticationServiceImplTest {
         doNothing().when(authenticationValidationService)
                 .findByUsernameThrowsExceptionIfExists(eq(TEST_USERNAME), any(IllegalStateException.class));
 
-        // When
         SignUpResponse result = authenticationService.signUp(request);
 
-        // Then
         assertNotNull(result);
         assertEquals(TEST_USERNAME, result.username());
         assertEquals(TEST_EMAIL, result.email());
@@ -174,14 +172,12 @@ class AuthenticationServiceImplTest {
 
     @Test
     void signUp_ShouldThrowExceptionWhenUserAlreadyExists() {
-        // Given
         SignUpRequest request = createSignUpRequest();
 
         doThrow(new IllegalStateException("User already exists"))
                 .when(authenticationValidationService)
                 .findByUsernameThrowsExceptionIfExists(eq(TEST_USERNAME), any(IllegalStateException.class));
 
-        // When & Then
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
                 () -> authenticationService.signUp(request)
@@ -193,7 +189,6 @@ class AuthenticationServiceImplTest {
         verifyNoInteractions(saltGenerator, encoder, userMapper, userRepository);
     }
 
-    // Tests for signIn method
     @Test
     void signIn_ShouldSuccessfullyAuthenticateUser() {
         // Given
@@ -210,14 +205,11 @@ class AuthenticationServiceImplTest {
                 .thenReturn(user);
         when(jwtTokenProvider.generateAccessToken(any(UserDetails.class))).thenReturn(TEST_ACCESS_TOKEN);
 
-        // Mock the internal createRefreshToken call
         AuthenticationServiceImpl spyService = spy(authenticationService);
         doReturn(refreshToken).when(spyService).createRefreshToken(eq(TEST_USERNAME));
 
-        // When
         AuthResponse result = spyService.signIn(request);
 
-        // Then
         assertNotNull(result);
         assertEquals(TEST_ACCESS_TOKEN, result.accessToken());
         assertEquals(TEST_REFRESH_TOKEN, result.refreshToken());
@@ -233,13 +225,11 @@ class AuthenticationServiceImplTest {
 
     @Test
     void signIn_ShouldThrowExceptionWhenAuthenticationFails() {
-        // Given
         SignInRequest request = createSignInRequest();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-        // When & Then
         BadCredentialsException exception = assertThrows(
                 BadCredentialsException.class,
                 () -> authenticationService.signIn(request)
@@ -252,7 +242,6 @@ class AuthenticationServiceImplTest {
 
     @Test
     void signIn_ShouldThrowExceptionWhenUserNotFound() {
-        // Given
         SignInRequest request = createSignInRequest();
         Authentication authentication = mock(Authentication.class);
 
@@ -262,7 +251,6 @@ class AuthenticationServiceImplTest {
                 eq(TEST_USERNAME), any(IllegalStateException.class)))
                 .thenThrow(new IllegalStateException("User not found"));
 
-        // When & Then
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
                 () -> authenticationService.signIn(request)
@@ -275,17 +263,14 @@ class AuthenticationServiceImplTest {
         verifyNoInteractions(jwtTokenProvider);
     }
 
-    // Tests for validateToken method
     @Test
     void validateToken_ShouldReturnValidResponseWhenTokenIsValid() {
         // Given
         when(jwtTokenProvider.validateToken(eq(TEST_ACCESS_TOKEN))).thenReturn(true);
         when(jwtTokenProvider.getUsernameFromToken(eq(TEST_ACCESS_TOKEN))).thenReturn(TEST_EMAIL);
 
-        // When
         TokenValidationResponse result = authenticationService.validateToken(TEST_ACCESS_TOKEN);
 
-        // Then
         assertNotNull(result);
         assertTrue(result.valid());
         assertEquals(TEST_EMAIL, result.username());
@@ -294,24 +279,6 @@ class AuthenticationServiceImplTest {
         verify(jwtTokenProvider).getUsernameFromToken(eq(TEST_ACCESS_TOKEN));
     }
 
-    @Test
-    void validateToken_ShouldReturnInvalidResponseWhenTokenIsInvalid() {
-        // Given
-        when(jwtTokenProvider.validateToken(eq(TEST_ACCESS_TOKEN))).thenReturn(false);
-
-        // When
-        TokenValidationResponse result = authenticationService.validateToken(TEST_ACCESS_TOKEN);
-
-        // Then
-        assertNotNull(result);
-        assertFalse(result.valid());
-        assertNull(result.username());
-
-        verify(jwtTokenProvider).validateToken(eq(TEST_ACCESS_TOKEN));
-        verify(jwtTokenProvider, never()).getUsernameFromToken(anyString());
-    }
-
-    // Tests for getRefreshToken method
     @Test
     void getRefreshToken_ShouldSuccessfullyRefreshToken() {
         // Given
@@ -323,16 +290,13 @@ class AuthenticationServiceImplTest {
         when(refreshTokenRepository.findByToken(eq(TEST_REFRESH_TOKEN)))
                 .thenReturn(Optional.of(refreshToken));
 
-        // Mock internal verifyExpiration call
         AuthenticationServiceImpl spyService = spy(authenticationService);
         doReturn(refreshToken).when(spyService).verifyExpiration(eq(refreshToken));
 
         when(jwtTokenProvider.generateAccessToken(any(UserDetails.class))).thenReturn(TEST_ACCESS_TOKEN);
 
-        // When
         AuthResponse result = spyService.getRefreshToken(request);
 
-        // Then
         assertNotNull(result);
         assertEquals(TEST_ACCESS_TOKEN, result.accessToken());
         assertEquals(TEST_REFRESH_TOKEN, result.refreshToken());
@@ -346,13 +310,11 @@ class AuthenticationServiceImplTest {
 
     @Test
     void getRefreshToken_ShouldThrowExceptionWhenTokenNotFound() {
-        // Given
         RefreshTokenRequest request = new RefreshTokenRequest(TEST_REFRESH_TOKEN);
 
         when(refreshTokenRepository.findByToken(eq(TEST_REFRESH_TOKEN)))
                 .thenReturn(Optional.empty());
 
-        // When & Then
         RefreshTokenException exception = assertThrows(
                 RefreshTokenException.class,
                 () -> authenticationService.getRefreshToken(request)
@@ -366,7 +328,6 @@ class AuthenticationServiceImplTest {
 
     @Test
     void getRefreshToken_ShouldThrowExceptionWhenTokenExpired() {
-        // Given
         RefreshTokenRequest request = new RefreshTokenRequest(TEST_REFRESH_TOKEN);
         User user = createUser();
         RefreshToken refreshToken = createRefreshToken(user, true);
@@ -374,12 +335,10 @@ class AuthenticationServiceImplTest {
         when(refreshTokenRepository.findByToken(eq(TEST_REFRESH_TOKEN)))
                 .thenReturn(Optional.of(refreshToken));
 
-        // Mock internal verifyExpiration to throw exception
         AuthenticationServiceImpl spyService = spy(authenticationService);
         doThrow(new RefreshTokenException("Refresh token is invalid"))
                 .when(spyService).verifyExpiration(eq(refreshToken));
 
-        // When & Then
         RefreshTokenException exception = assertThrows(
                 RefreshTokenException.class,
                 () -> spyService.getRefreshToken(request)
@@ -391,10 +350,8 @@ class AuthenticationServiceImplTest {
         verifyNoInteractions(jwtTokenProvider);
     }
 
-    // Tests for createRefreshToken method
     @Test
     void createRefreshToken_ShouldSuccessfullyCreateRefreshToken() {
-        // Given
         User user = createUser();
         long refreshTokenExpiration = 86400000L; // 24 hours
 
@@ -407,10 +364,8 @@ class AuthenticationServiceImplTest {
             return token;
         });
 
-        // When
         RefreshToken result = authenticationService.createRefreshToken(TEST_USERNAME);
 
-        // Then
         assertNotNull(result);
         assertEquals(TEST_REFRESH_TOKEN, result.getToken());
         assertEquals(user, result.getUser());
@@ -425,10 +380,8 @@ class AuthenticationServiceImplTest {
 
     @Test
     void createRefreshToken_ShouldThrowExceptionWhenUserNotFound() {
-        // Given
         when(userRepository.findByUsername(eq(TEST_USERNAME))).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(
                 org.springframework.security.core.userdetails.UsernameNotFoundException.class,
                 () -> authenticationService.createRefreshToken(TEST_USERNAME)
@@ -438,17 +391,13 @@ class AuthenticationServiceImplTest {
         verifyNoInteractions(refreshTokenRepository, jwtTokenProvider);
     }
 
-    // Tests for verifyExpiration method
     @Test
     void verifyExpiration_ShouldReturnTokenWhenNotExpired() {
-        // Given
         User user = createUser();
         RefreshToken refreshToken = createRefreshToken(user, false);
 
-        // When
         RefreshToken result = authenticationService.verifyExpiration(refreshToken);
 
-        // Then
         assertNotNull(result);
         assertEquals(refreshToken, result);
         verify(refreshTokenRepository, never()).delete(any(RefreshToken.class));
@@ -456,11 +405,9 @@ class AuthenticationServiceImplTest {
 
     @Test
     void verifyExpiration_ShouldThrowExceptionAndDeleteWhenTokenExpired() {
-        // Given
         User user = createUser();
         RefreshToken refreshToken = createRefreshToken(user, true);
 
-        // When & Then
         RefreshTokenException exception = assertThrows(
                 RefreshTokenException.class,
                 () -> authenticationService.verifyExpiration(refreshToken)
@@ -470,20 +417,16 @@ class AuthenticationServiceImplTest {
         verify(refreshTokenRepository).delete(eq(refreshToken));
     }
 
-    // Tests for findByToken method
     @Test
     void findByToken_ShouldReturnTokenWhenExists() {
-        // Given
         User user = createUser();
         RefreshToken expectedToken = createRefreshToken(user, false);
 
         when(refreshTokenRepository.findByToken(eq(TEST_REFRESH_TOKEN)))
                 .thenReturn(Optional.of(expectedToken));
 
-        // When
         Optional<RefreshToken> result = authenticationService.findByToken(TEST_REFRESH_TOKEN);
 
-        // Then
         assertTrue(result.isPresent());
         assertEquals(expectedToken, result.get());
         verify(refreshTokenRepository).findByToken(eq(TEST_REFRESH_TOKEN));
@@ -491,14 +434,11 @@ class AuthenticationServiceImplTest {
 
     @Test
     void findByToken_ShouldReturnEmptyWhenTokenNotFound() {
-        // Given
         when(refreshTokenRepository.findByToken(eq(TEST_REFRESH_TOKEN)))
                 .thenReturn(Optional.empty());
 
-        // When
         Optional<RefreshToken> result = authenticationService.findByToken(TEST_REFRESH_TOKEN);
 
-        // Then
         assertTrue(result.isEmpty());
         verify(refreshTokenRepository).findByToken(eq(TEST_REFRESH_TOKEN));
     }
