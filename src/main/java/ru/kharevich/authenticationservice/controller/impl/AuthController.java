@@ -58,4 +58,10 @@ public class AuthController implements AuthApi {
         return authenticationService.getRefreshToken(request);
     }
 
+    @GetMapping("/info")
+    @ResponseStatus(HttpStatus.OK)
+    public SignUpResponse getUserInfo() {
+        return authenticationService.getUserInfo();
+    }
+
 }

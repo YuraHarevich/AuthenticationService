@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.kharevich.authenticationservice.dto.ErrorMessage;
+import ru.kharevich.authenticationservice.exceptions.AuthenticationException;
 import ru.kharevich.authenticationservice.exceptions.RefreshTokenException;
 import ru.kharevich.authenticationservice.exceptions.TokenValidationException;
 import ru.kharevich.authenticationservice.exceptions.UserNotFoundException;
@@ -31,7 +32,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-            TokenValidationException.class
+            TokenValidationException.class,
+            AuthenticationException.class
     })
     public ResponseEntity<ErrorMessage> handleUnauthorized(Exception exception) {
         return ResponseEntity

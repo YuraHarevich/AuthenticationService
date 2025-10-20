@@ -24,4 +24,6 @@ public interface AuthenticationService {
     RefreshToken verifyExpiration(RefreshToken token);
 
     Optional<RefreshToken> findByToken(String token);
+
+    SignUpResponse getUserInfo();
 }
