@@ -20,4 +20,6 @@ public interface AuthApi {
 
     AuthResponse refreshToken(@Valid @RequestBody RefreshTokenRequest request);
 
+    SignUpResponse getUserInfo();
+
 }

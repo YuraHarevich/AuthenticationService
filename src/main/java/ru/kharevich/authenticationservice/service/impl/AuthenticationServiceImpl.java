@@ -3,6 +3,8 @@ package ru.kharevich.authenticationservice.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -14,6 +16,7 @@ import ru.kharevich.authenticationservice.dto.request.SignUpRequest;
 import ru.kharevich.authenticationservice.dto.response.AuthResponse;
 import ru.kharevich.authenticationservice.dto.response.SignUpResponse;
 import ru.kharevich.authenticationservice.dto.response.TokenValidationResponse;
+import ru.kharevich.authenticationservice.exceptions.AuthenticationException;
 import ru.kharevich.authenticationservice.exceptions.RefreshTokenException;
 import ru.kharevich.authenticationservice.exceptions.TokenValidationException;
 import ru.kharevich.authenticationservice.model.RefreshToken;
@@ -135,6 +138,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
+    }
+
+    public SignUpResponse getUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            String username = authentication.getName();
+            User user = userRepository.findByUsername(username).orElseThrow(()-> new AuthenticationException("Authentication Failed"));
+            return userMapper.toResponse(user);
+        }
+        throw new AuthenticationException("Unauthenticated");
     }
 
 }

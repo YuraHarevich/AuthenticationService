@@ -143,7 +143,7 @@ class AuthenticationServiceImplTest {
         SignUpRequest request = createSignUpRequest();
         User user = createUser();
         SignUpResponse expectedResponse = new SignUpResponse(
-                TEST_USERNAME, TEST_EMAIL, "John", "Doe", request.birthDate()
+                UUID.randomUUID(), TEST_USERNAME, TEST_EMAIL, "John", "Doe", request.birthDate()
         );
 
         when(saltGenerator.generateSalt()).thenReturn(TEST_SALT);
